@@ -1,3 +1,5 @@
+//app creates an auto complete list
+
 const express = require('express')
 const app = express()
 const cors = require('cors')
@@ -16,6 +18,54 @@ MongoClient.connect(dbConnectionStr)
         db = client.db(dbName)
         collection = db.collection('movies')
     })
+
+    // MIDDLEWARE
+    app.use(express.urlencoded({extended:true}))
+    app.use(express.json())
+    app.use(cors())
+//
+
+app.get("/search", async (req, res) => {
+    try {
+        let res = await collection.aggregate([
+            {
+                "$Search" : {
+                    "autocomplete" : {
+                        "query" : '${request.query.query}',
+                        "path" : "title",
+                        "fuzzy" : {
+                            "maxEdits" : 2,
+                            "prefixLength" : 3
+
+                        }
+
+
+                    }
+
+                }
+
+            }
+
+        ]).toArray()
+        res.send(result)
+    } catch(error) {
+        res.status(500).send({message: error.message})
+    }
+})
+
+app.get("/get/:id", async (req, res) => {
+    try{
+        let result = await collection.findOne({
+            "_id" : ObjectId(request.params.id)
+        })
+        res.send(result)
+
+
+    } catch(error) {
+        res.status(500).send({message: error.message})
+    }
+})
+
 
     app.listen(process.env.PORT || PORT, () => {
         console.log('Server is running.')
