@@ -5,7 +5,7 @@ const app = express()
 const cors = require('cors')
 const {MongoClient, ObjectId } = require('mongodb')
 require('dotenv').config()
-const PORT = 8000
+const PORT = 9000
 
 let db, 
     dbConnectionStr = process.env.DB_STRING,
@@ -17,6 +17,7 @@ MongoClient.connect(dbConnectionStr)
         console.log('Connected to the database')
         db = client.db(dbName)
         collection = db.collection('movies')
+        console.log(collection)
     })
 
     // MIDDLEWARE
@@ -27,11 +28,11 @@ MongoClient.connect(dbConnectionStr)
 
 app.get("/search", async (req, res) => {
     try {
-        let res = await collection.aggregate([
+        let result = await collection.aggregate([
             {
-                "$Search" : {
+                "$search" : {
                     "autocomplete" : {
-                        "query" : '${request.query.query}',
+                        "query" : `${request.query.query}`,
                         "path" : "title",
                         "fuzzy" : {
                             "maxEdits" : 2,
@@ -47,22 +48,27 @@ app.get("/search", async (req, res) => {
             }
 
         ]).toArray()
+        console.log(result)
         res.send(result)
     } catch(error) {
         res.status(500).send({message: error.message})
+        //console.log(error)
     }
 })
+
+
 
 app.get("/get/:id", async (req, res) => {
     try{
         let result = await collection.findOne({
-            "_id" : ObjectId(request.params.id)
+            "_id" : ObjectId(req.params.id)
         })
         res.send(result)
 
 
     } catch(error) {
         res.status(500).send({message: error.message})
+        //console.log(error)
     }
 })
 
