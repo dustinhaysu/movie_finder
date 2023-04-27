@@ -4,6 +4,9 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const {MongoClient, ObjectId } = require('mongodb')
+const { res } = require('express')
+const { req } = require('http')
+
 require('dotenv').config()
 const PORT = 9000
 
@@ -17,7 +20,6 @@ MongoClient.connect(dbConnectionStr)
         console.log('Connected to the database')
         db = client.db(dbName)
         collection = db.collection('movies')
-        console.log(collection)
     })
 
     // MIDDLEWARE
@@ -32,7 +34,7 @@ app.get("/search", async (req, res) => {
             {
                 "$search" : {
                     "autocomplete" : {
-                        "query" : `${request.query.query}`,
+                        "query" : `${req.query.query}`,
                         "path" : "title",
                         "fuzzy" : {
                             "maxEdits" : 2,
@@ -52,7 +54,7 @@ app.get("/search", async (req, res) => {
         res.send(result)
     } catch(error) {
         res.status(500).send({message: error.message})
-        //console.log(error)
+        console.log(error)
     }
 })
 
@@ -61,14 +63,14 @@ app.get("/search", async (req, res) => {
 app.get("/get/:id", async (req, res) => {
     try{
         let result = await collection.findOne({
-            "_id" : ObjectId(req.params.id)
+            "_id" : new ObjectId(req.params.id)
         })
         res.send(result)
 
 
     } catch(error) {
         res.status(500).send({message: error.message})
-        //console.log(error)
+        console.log(error)
     }
 })
 

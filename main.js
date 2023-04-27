@@ -3,7 +3,6 @@ $(document).ready(function () {
         source: async function(req, res) {
             let data = await fetch(`http://localhost:9000/search?query=${req.term}`)
                 .then(results => results.json())
-                .then(results => console.log(results))
                 .then(results => results.map(result => {
                     return{
                         label: result.title,
@@ -12,6 +11,7 @@ $(document).ready(function () {
                     }
                 }))
             res(data)
+            //console.log(res)
 
         },
         minLength: 2, 
