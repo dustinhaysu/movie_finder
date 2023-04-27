@@ -50,7 +50,7 @@ app.get("/search", async (req, res) => {
             }
 
         ]).toArray()
-        console.log(result)
+        //console.log(result)
         res.send(result)
     } catch(error) {
         res.status(500).send({message: error.message})
